@@ -11,6 +11,19 @@ async function main() {
 
   await producer.connect();
   await consumer.connect();
+
+  await consumer.subscribe({ topic: "divide", fromBeginning: true });
+
+  await consumer.run({
+    eachMessage: async ({ topic, partition, message }) => {
+      const { num1, num2 } = JSON.parse(message.value.toString());
+
+      producer.send({
+        topic: "quotient",
+        messages: [{ value: JSON.stringify(num1 / num2) }],
+      });
+    },
+  });
 }
 
 try {
